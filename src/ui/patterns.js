@@ -5,7 +5,6 @@ function UIpatternsInit() {
 
 	UIpatterns.setDAWCore( DAW );
 	win.append( UIpatterns.rootElement );
-	UIpatterns.attached();
 	gsuiPatterns.selectChanPopupContent.classList.add( "popup" );
 }
 
@@ -29,7 +28,7 @@ function UIupdatePattern( id, obj ) {
 			if ( ( foc === "pianoroll" && id === DAW.get.patternKeysOpened() ) ||
 				( foc === "drums" && id === DAW.get.patternDrumsOpened() )
 			) {
-				DOM.sliderTime.options( { max: obj.duration } );
+				DOM.sliderTime.setAttribute( "max", obj.duration );
 			}
 		}
 		if ( "name" in obj ) {

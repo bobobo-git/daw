@@ -15,12 +15,14 @@ function UIrun() {
 	} );
 
 	window.DAW = DAW;
-	window.VERSION = "0.32.0";
+	window.VERSION = "0.32.3";
 
 	window.UIdrums = new GSDrums();
 	window.UIeffects = new GSEffects();
 	window.UImixer = new GSMixer();
+	window.UIpatternroll = new GSPatternroll();
 	window.UIpatterns = new GSPatterns();
+	window.UIpianoroll = new GSPianoroll();
 	window.UIsynth = new GSSynth();
 
 	UIdomInit();
@@ -45,7 +47,7 @@ function UIrun() {
 	UIsettingsPopupInit();
 	UIshortcutsPopupInit();
 
-	window.onblur = () => UIkeys.midiReleaseAllKeys();
+	window.onblur = () => UIpianoroll.getUIKeys().midiReleaseAllKeys();
 	window.onkeyup = UIkeyboardUp;
 	window.onkeydown = UIkeyboardDown;
 	window.onbeforeunload = UIcompositionBeforeUnload;

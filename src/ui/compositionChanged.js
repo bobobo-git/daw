@@ -7,6 +7,8 @@ function UIcompositionChanged( obj, prevObj ) {
 	UIdrums.change( obj );
 	UIeffects.change( obj );
 	UImixer.change( obj );
+	UIpianoroll.change( obj );
+	UIpatternroll.change( obj );
 	UIcompositionChanged.fn.forEach( ( fn, attrs ) => {
 		if ( attrs.some( attr => attr in obj ) ) {
 			fn( obj, prevObj );
@@ -33,30 +35,19 @@ UIcompositionChanged.fn = new Map( [
 			UIsynthChange( synOpened );
 		}
 	} ],
-	[ [ "tracks", "blocks" ], function( obj ) {
-		GSUtils.diffAssign( UIpatternroll.data.tracks, obj.tracks );
-		GSUtils.diffAssign( UIpatternroll.data.blocks, obj.blocks );
-	} ],
 	[ [ "patterns" ], function( obj ) {
 		Object.entries( obj.patterns ).forEach( kv => UIupdatePattern( ...kv ) );
-	} ],
-	[ [ "loopA", "loopB" ], function() {
-		UIpatternroll.loop(
-			DAW.get.loopA(),
-			DAW.get.loopB() );
 	} ],
 	[ [ "beatsPerMeasure", "stepsPerBeat" ], function() {
 		const bPM = DAW.get.beatsPerMeasure(),
 			sPB = DAW.get.stepsPerBeat();
 
-		UIclock.setStepsPerBeat( sPB );
-		UIpatternroll.timeSignature( bPM, sPB );
-		UIpianoroll.timeSignature( bPM, sPB );
+		UIclock.setAttribute( "stepsPerBeat", sPB );
 		DOM.beatsPerMeasure.textContent = bPM;
 		DOM.stepsPerBeat.textContent = sPB;
 	} ],
 	[ [ "bpm" ], function( { bpm } ) {
-		UIclock.setBPM( bpm );
+		UIclock.setAttribute( "bpm", bpm );
 		DOM.bpm.textContent =
 		UIcompositions.get( DAW.get.cmp() ).bpm.textContent = bpm;
 		UIupdatePatternsBPM( bpm );
@@ -70,17 +61,10 @@ UIcompositionChanged.fn = new Map( [
 		const [ min, sec ] = GSUtils.parseBeatsToSeconds( duration, DAW.get.bpm() );
 
 		if ( DAW.getFocusedName() === "composition" ) {
-			DOM.sliderTime.options( { max: duration } );
+			DOM.sliderTime.setAttribute( "max", duration );
 		}
 		DOM.headCmpDur.textContent =
 		UIcompositions.get( DAW.get.cmp() ).duration.textContent = `${ min }:${ sec }`;
-	} ],
-	[ [ "keys" ], function( { keys } ) {
-		const patOpened = DAW.get.pattern( DAW.get.patternKeysOpened() );
-
-		if ( patOpened && patOpened.keys in keys ) {
-			GSUtils.diffAssign( UIpianoroll.data, keys[ patOpened.keys ] );
-		}
 	} ],
 	[ [ "patternDrumsOpened" ], function( obj ) {
 		if ( obj.patternDrumsOpened ) {
@@ -89,7 +73,7 @@ UIcompositionChanged.fn = new Map( [
 			DOM.drumsName.textContent = pat.name;
 			UIwindows.window( "drums" ).open();
 			if ( DAW.getFocusedName() === "drums" ) {
-				DOM.sliderTime.options( { max: pat.duration } );
+				DOM.sliderTime.setAttribute( "max", pat.duration );
 			}
 		} else {
 			DOM.drumsName.textContent = "";
@@ -108,23 +92,18 @@ UIcompositionChanged.fn = new Map( [
 		}
 	} ],
 	[ [ "patternKeysOpened" ], function( { patternKeysOpened } ) {
-		UIpianoroll.empty();
 		if ( patternKeysOpened ) {
 			const pat = DAW.get.pattern( patternKeysOpened );
 
 			DOM.pianorollName.textContent = pat.name;
 			DOM.pianorollForbidden.classList.add( "hidden" );
-			GSUtils.diffAssign( UIpianoroll.data, DAW.get.keys( pat.keys ) );
-			UIpianoroll.resetKey();
-			UIpianoroll.scrollToKeys();
 			if ( DAW.getFocusedName() === "pianoroll" ) {
-				DOM.sliderTime.options( { max: pat.duration } );
+				DOM.sliderTime.setAttribute( "max", pat.duration );
 			}
 			UIwindows.window( "piano" ).open();
 		} else {
 			DOM.pianorollName.textContent = "";
 			DOM.pianorollForbidden.classList.remove( "hidden" );
-			UIpianoroll.setPxPerBeat( 90 );
 		}
 	} ],
 ] );
